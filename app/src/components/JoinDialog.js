@@ -2,23 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import { withRoomContext } from '../RoomContext';
-import classnames from 'classnames';
-import isElectron from 'is-electron';
+// import classnames from 'classnames';
 import * as settingsActions from '../actions/settingsActions';
 import PropTypes from 'prop-types';
 import { useIntl, FormattedMessage } from 'react-intl';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import Avatar from '@material-ui/core/Avatar';
+// import AccountCircle from '@material-ui/icons/AccountCircle';
+// import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import Button from '@material-ui/core/Button';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import TextField from '@material-ui/core/TextField';
-import InputAdornment from '@material-ui/core/InputAdornment';
+// import TextField from '@material-ui/core/TextField';
+// import InputAdornment from '@material-ui/core/InputAdornment';
 import CookieConsent from 'react-cookie-consent';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
@@ -28,12 +27,12 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import BlockIcon from '@material-ui/icons/Block';
 import MicIcon from '@material-ui/icons/Mic';
 import VideocamIcon from '@material-ui/icons/Videocam';
-import MeetingRoomIcon from '@material-ui/icons/MeetingRoom';
+// import MeetingRoomIcon from '@material-ui/icons/MeetingRoom';
 import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import randomString from 'random-string';
 import { useHistory, useLocation } from 'react-router-dom';
-import IconButton from '@material-ui/core/IconButton';
+// import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 
 const styles = (theme) =>
@@ -154,10 +153,10 @@ const JoinDialog = ({
 	roomClient,
 	room,
 	mediaPerms,
-	displayName,
-	displayNameInProgress,
+	// displayName,
+	// displayNameInProgress,
 	loggedIn,
-	myPicture,
+	// myPicture,
 	changeDisplayName,
 	setMediaPerms,
 	classes,
@@ -172,26 +171,34 @@ const JoinDialog = ({
 
 	const intl = useIntl();
 
-	displayName = displayName.trimLeft();
+	// displayName = displayName.trimLeft();
 
 	const authTypeDefault = (loggedIn) ? 'auth' : 'guest';
 
 	const [ authType, setAuthType ] = useState(authTypeDefault);
 
+	// eslint-disable-next-line
 	const [ roomId, setRoomId ] = useState(
 		decodeURIComponent(location.pathname.slice(1)) ||
-		randomString({ length: 8 }).toLowerCase()
+		randomString({ length: 10 })
 	);
+
+	const handleSetName = () =>
+	{
+		const authData = JSON.parse(window.name);
+
+		changeDisplayName(authData.name);
+	};
 
 	useEffect(() =>
 	{
 		window.history.replaceState({}, null, encodeURIComponent(roomId) || '/');
-
 	}, [ roomId ]);
 
 	useEffect(() =>
 	{
 		(location.pathname === '/') && history.push(encodeURIComponent(roomId));
+		handleSetName();
 	});
 
 	const _askForPerms = () =>
@@ -204,7 +211,6 @@ const JoinDialog = ({
 
 	const handleSetMediaPerms = (event, newMediaPerms) =>
 	{
-
 		if (newMediaPerms !== null)
 		{
 			setMediaPerms(JSON.parse(newMediaPerms));
@@ -237,7 +243,7 @@ const JoinDialog = ({
 		});
 	};
 
-	const handleFocus = (event) => event.target.select();
+	// const handleFocus = (event) => event.target.select();
 
 	/*
 	const handleAuth = () =>
@@ -262,29 +268,29 @@ const JoinDialog = ({
 		if (event.key === 'Enter') document.getElementById('joinButton').click();
 	};
 
-	const handleChangeDisplayName = (event) =>
-	{
-		const { key } = event;
+	// const handleChangeDisplayName = (event) =>
+	// {
+	// 	const { key } = event;
 
-		switch (key)
-		{
-			case 'Enter':
-			case 'Escape':
+	// 	switch (key)
+	// 	{
+	// 		case 'Enter':
+	// 		case 'Escape':
 
-			{
-				displayName = displayName.trim();
+	// 		{
+	// 			displayName = displayName.trim();
 
-				if (displayName === '')
-					changeDisplayName(
-						`Guest ${Math.floor(Math.random() * (100000 - 10000)) + 10000}`);
-				if (room.inLobby)
-					roomClient.changeDisplayName(displayName);
-				break;
-			}
-			default:
-				break;
-		}
-	};
+	// 			if (displayName === '')
+	// 				changeDisplayName(
+	// 					`Guest ${Math.floor(Math.random() * (100000 - 10000)) + 10000}`);
+	// 			if (room.inLobby)
+	// 				roomClient.changeDisplayName(displayName);
+	// 			break;
+	// 		}
+	// 		default:
+	// 			break;
+	// 	}
+	// };
 
 	return (
 		<div className={classes.root}>
@@ -309,7 +315,7 @@ const JoinDialog = ({
 								<Typography variant='h5'> {window.config.title} </Typography>
 							}
 						</Grid>
-						<Grid item>
+						{/* <Grid item>
 							{ window.config.loginEnabled &&
 							<Tooltip
 								open
@@ -342,14 +348,14 @@ const JoinDialog = ({
 							</Tooltip>
 							}
 
-						</Grid>
+						</Grid> */}
 					</Grid>
 				</DialogTitle>
 
 				<DialogContent>
 					<hr />
 					{/* ROOM NAME */}
-					<TextField
+					{/* <TextField
 						autoFocus
 						id='roomId'
 						label={intl.formatMessage({
@@ -377,10 +383,10 @@ const JoinDialog = ({
 						onBlur={() =>
 						{
 							if (roomId === '')
-								setRoomId(randomString({ length: 8 }).toLowerCase());
+								setRoomId(randomString({ length: 10 }));
 						}}
 						fullWidth
-					/>
+					/> */}
 					{/* /ROOM NAME */}
 
 					{/* AUTH TOGGLE BUTTONS */}
@@ -423,8 +429,8 @@ const JoinDialog = ({
 					}
 					{/* /AUTH TOGGLE BUTTONS */}
 
-					{/* NAME FIELD */}
-					<TextField
+					{/* NAME FIELD get name from classroom */}
+					{/* <TextField
 						id='displayname'
 						label={intl.formatMessage({
 							id             : 'label.yourName',
@@ -461,7 +467,7 @@ const JoinDialog = ({
 								roomClient.changeDisplayName(displayName);
 						}}
 						fullWidth
-					/>
+					/> */}
 					{/* NAME FIELD*/}
 
 					{!room.inLobby && room.overRoomLimit &&
@@ -652,18 +658,16 @@ const JoinDialog = ({
 					</DialogContent>
 				}
 
-				{ !isElectron() &&
-					<CookieConsent buttonText={intl.formatMessage({
-						id             : 'room.consentUnderstand',
-						defaultMessage : 'I understand'
-					})}
-					>
-						<FormattedMessage
-							id='room.cookieConsent'
-							defaultMessage='This website uses cookies to enhance the user experience'
-						/>
-					</CookieConsent>
-				}
+				<CookieConsent buttonText={intl.formatMessage({
+					id             : 'room.consentUnderstand',
+					defaultMessage : 'I understand'
+				})}
+				>
+					<FormattedMessage
+						id='room.cookieConsent'
+						defaultMessage='This website uses cookies to enhance the user experience'
+					/>
+				</CookieConsent>
 			</Dialog>
 		</div>
 	);
@@ -671,32 +675,29 @@ const JoinDialog = ({
 
 JoinDialog.propTypes =
 {
-	roomClient            : PropTypes.any.isRequired,
-	room                  : PropTypes.object.isRequired,
-	roomId                : PropTypes.string.isRequired,
-	displayName           : PropTypes.string.isRequired,
-	displayNameInProgress : PropTypes.bool.isRequired,
-	loginEnabled          : PropTypes.bool.isRequired,
-	loggedIn              : PropTypes.bool.isRequired,
-	myPicture             : PropTypes.string,
-	changeDisplayName     : PropTypes.func.isRequired,
-	setMediaPerms  	      : PropTypes.func.isRequired,
-	classes               : PropTypes.object.isRequired,
-	mediaPerms            : PropTypes.object.isRequired,
-	setAudioMuted         : PropTypes.bool.isRequired,
-	setVideoMuted         : PropTypes.bool.isRequired
+	roomClient        : PropTypes.any.isRequired,
+	room              : PropTypes.object.isRequired,
+	roomId            : PropTypes.string.isRequired,
+	displayName       : PropTypes.string.isRequired,
+	loginEnabled      : PropTypes.bool.isRequired,
+	loggedIn          : PropTypes.bool.isRequired,
+	changeDisplayName : PropTypes.func.isRequired,
+	setMediaPerms  	  : PropTypes.func.isRequired,
+	classes           : PropTypes.object.isRequired,
+	mediaPerms        : PropTypes.object.isRequired,
+	setAudioMuted     : PropTypes.bool.isRequired,
+	setVideoMuted     : PropTypes.bool.isRequired
 };
 
 const mapStateToProps = (state) =>
 {
 	return {
-		room                  : state.room,
-		mediaPerms            : state.settings.mediaPerms,
-		displayName           : state.settings.displayName,
-		displayNameInProgress : state.me.displayNameInProgress,
-		loginEnabled          : state.me.loginEnabled,
-		loggedIn              : state.me.loggedIn,
-		myPicture             : state.me.picture
+		room         : state.room,
+		mediaPerms   : state.settings.mediaPerms,
+		displayName  : state.settings.displayName,
+		loginEnabled : state.me.loginEnabled,
+		loggedIn     : state.me.loggedIn,
+		myPicture    : state.me.picture
 	};
 };
 
@@ -737,7 +738,6 @@ export default withRoomContext(connect(
 				prev.room.overRoomLimit === next.room.overRoomLimit &&
 				prev.settings.displayName === next.settings.displayName &&
 				prev.settings === next.settings &&
-				prev.me.displayNameInProgress === next.me.displayNameInProgress &&
 				prev.me.loginEnabled === next.me.loginEnabled &&
 				prev.me.loggedIn === next.me.loggedIn &&
 				prev.me.picture === next.me.picture

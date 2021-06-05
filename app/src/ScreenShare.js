@@ -1,78 +1,3 @@
-import isElectron from 'is-electron';
-
-let electron = null;
-
-/** 
- * Check if window.require function exits
- * because electron default is "nodeIntegration: false"
- * and this case window.require is not a function.
- * It caused issue with Rocket Chat electron client.
- * 
- * TODO: do it more inteligently.
- */
-if (isElectron() && typeof window.require === 'function')
-	electron = window.require('electron');
-
-class ElectronScreenShare
-{
-	constructor()
-	{
-		this._stream = null;
-	}
-
-	start()
-	{
-		return Promise.resolve()
-			.then(() =>
-			{
-				return electron.desktopCapturer.getSources({ types: [ 'window', 'screen' ] });
-			})
-			.then((sources) =>
-			{
-				for (const source of sources)
-				{
-					// Currently only getting whole screen
-					if (source.name === 'Entire Screen')
-					{
-						return navigator.mediaDevices.getUserMedia({
-							audio : true,
-							video :
-							{
-								mandatory :
-								{
-									chromeMediaSource   : 'desktop',
-									chromeMediaSourceId : source.id
-								}
-							}
-						});
-					}
-				}
-			})
-			.then((stream) =>
-			{
-				this._stream = stream;
-
-				return stream;
-			});
-	}
-
-	stop()
-	{
-		if (this._stream instanceof MediaStream === false)
-		{
-			return;
-		}
-
-		this._stream.getTracks().forEach((track) => track.stop());
-		this._stream = null;
-	}
-
-	isScreenShareAvailable()
-	{
-		return true;
-	}
-}
-
 class DisplayMediaScreenShare
 {
 	constructor()
@@ -220,9 +145,7 @@ export default class ScreenShare
 {
 	static create(device)
 	{
-		if (electron)
-			return new ElectronScreenShare();
-		else if (device.platform !== 'desktop')
+		if (device.platform !== 'desktop')
 			return new DefaultScreenShare();
 		else
 		{

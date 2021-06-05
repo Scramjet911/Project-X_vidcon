@@ -1,6 +1,5 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import isElectron from 'is-electron';
 import PropTypes from 'prop-types';
 import { useIntl, FormattedMessage } from 'react-intl';
 import Dialog from '@material-ui/core/Dialog';
@@ -170,18 +169,16 @@ const ChooseRoom = ({
 					</DialogActions>
 				</form>
 
-				{ !isElectron() &&
-					<CookieConsent buttonText={intl.formatMessage({
-						id             : 'room.consentUnderstand',
-						defaultMessage : 'I understand'
-					})}
-					>
-						<FormattedMessage
-							id='room.cookieConsent'
-							defaultMessage='This website uses cookies to enhance the user experience'
-						/>
-					</CookieConsent>
-				}
+				<CookieConsent buttonText={intl.formatMessage({
+					id             : 'room.consentUnderstand',
+					defaultMessage : 'I understand'
+				})}
+				>
+					<FormattedMessage
+						id='room.cookieConsent'
+						defaultMessage='This website uses cookies to enhance the user experience'
+					/>
+				</CookieConsent>
 			</Dialog>
 		</div>
 	);

@@ -2,12 +2,11 @@ import domready from 'domready';
 import React, { Suspense } from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
-import isElectron from 'is-electron';
 
 import { createIntl } from 'react-intl';
 import { IntlProvider } from 'react-intl-redux';
 
-import { Route, HashRouter, BrowserRouter, Switch } from 'react-router-dom';
+import { Route, BrowserRouter, Switch } from 'react-router-dom';
 import randomString from 'random-string';
 import Logger from './Logger';
 import debug from 'debug';
@@ -61,12 +60,7 @@ RoomClient.init({ store });
 
 const theme = createMuiTheme(window.config.theme);
 
-let Router;
-
-if (isElectron())
-	Router = HashRouter;
-else
-	Router = BrowserRouter;
+const Router = BrowserRouter;
 
 domready(() =>
 {
@@ -160,6 +154,10 @@ function run()
 			loginEnabled : window.config.loginEnabled
 		})
 	);
+
+	const authData = localStorage.getItem('auth_data');
+
+	logger.debug(authData);
 
 	roomClient = new RoomClient(
 		{

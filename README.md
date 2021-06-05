@@ -1,7 +1,7 @@
 ### Video Conferencing
  1. Install npm packages in app and server folders (npm i)
  2. Install redis server - 
-		 - curl -O http://download.redis.io/redis-stable.tar.gz
+		or with homebrew- curl -O http://download.redis.io/redis-stable.tar.gz
 		- tar xzvf redis-stable.tar.gz
 		- cd redis-stable
 		- make
