@@ -1,39 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import { withRoomContext } from '../RoomContext';
-// import classnames from 'classnames';
+import classnames from 'classnames';
 import * as settingsActions from '../actions/settingsActions';
 import PropTypes from 'prop-types';
 import { useIntl, FormattedMessage } from 'react-intl';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContentText from '@material-ui/core/DialogContentText';
-// import AccountCircle from '@material-ui/icons/AccountCircle';
-// import Avatar from '@material-ui/core/Avatar';
-import Typography from '@material-ui/core/Typography';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import Button from '@material-ui/core/Button';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-// import TextField from '@material-ui/core/TextField';
-// import InputAdornment from '@material-ui/core/InputAdornment';
 import CookieConsent from 'react-cookie-consent';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import BlockIcon from '@material-ui/icons/Block';
 import MicIcon from '@material-ui/icons/Mic';
 import VideocamIcon from '@material-ui/icons/Videocam';
-// import MeetingRoomIcon from '@material-ui/icons/MeetingRoom';
 import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import randomString from 'random-string';
 import { useHistory, useLocation } from 'react-router-dom';
-// import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
+import Logger from '../Logger';
+
+const logger = new Logger('JoinDialog');
 
 const styles = (theme) =>
 	({
@@ -48,9 +43,6 @@ const styles = (theme) =>
 			backgroundPosition   : 'center',
 			backgroundSize       : 'cover',
 			backgroundRepeat     : 'no-repeat'
-		},
-		dialogTitle :
-		{
 		},
 		dialogPaper :
 		{
@@ -73,16 +65,62 @@ const styles = (theme) =>
 				width : '90vw'
 			}
 		},
-		accountButton :
+		videoContainer :
 		{
-			padding : 0
+			position      : 'relative',
+			flex          : '100 100 auto',
+			height        : '100%',
+			width         : '100%',
+			display       : 'flex',
+			flexDirection : 'column',
+			overflow      : 'hidden'
 		},
-		accountButtonAvatar :
+		video :
 		{
-			width  : 50,
-			height : 50
+			flex               : '100 100 auto',
+			height             : '100%',
+			width              : '100%',
+			objectFit          : 'cover',
+			userSelect         : 'none',
+			transitionProperty : 'opacity',
+			transitionDuration : '.15s',
+			backgroundColor    : 'var(--peer-video-bg-color)',
+			'&.isMirrored'     :
+			{
+				transform : 'scaleX(-1)'
+			},
+			'&.loading' :
+			{
+				filter : 'blur(5px)'
+			},
+			'&.contain' :
+			{
+				objectFit       : 'contain',
+				backgroundColor : 'rgba(0, 0, 0, 1)'
+			}
 		},
-
+		info :
+		{
+			width          : 'fit-content',
+			height         : '100%',
+			padding        : theme.spacing(1),
+			position       : 'absolute',
+			zIndex         : 10,
+			display        : 'flex',
+			flexDirection  : 'column-reverse',
+			justifyContent : 'space-between'
+		},
+		displayName :
+		{
+			userSelect : 'none',
+			fontSize   : 14,
+			fontWeight : 600,
+			color      : 'rgba(255, 255, 255, 0.85)',
+			'&:hover'  :
+			{
+				backgroundColor : 'rgb(174, 255, 0, 0.25)'
+			}
+		},
 		green :
 		{
 			color : '#5F9B2D'
@@ -125,14 +163,6 @@ const styles = (theme) =>
 
 	});
 
-const DialogTitle = withStyles((theme) => ({
-	root :
-	{
-		margin  : 0,
-		padding : theme.spacing(1)
-	}
-}))(MuiDialogTitle);
-
 const DialogContent = withStyles((theme) => ({
 	root :
 	{
@@ -153,10 +183,8 @@ const JoinDialog = ({
 	roomClient,
 	room,
 	mediaPerms,
-	// displayName,
-	// displayNameInProgress,
+	displayName,
 	loggedIn,
-	// myPicture,
 	changeDisplayName,
 	setMediaPerms,
 	classes,
@@ -165,13 +193,13 @@ const JoinDialog = ({
 }) =>
 {
 
+	const videoElement = useRef(null);
+
 	const location = useLocation();
 
 	const history = useHistory();
 
 	const intl = useIntl();
-
-	// displayName = displayName.trimLeft();
 
 	const authTypeDefault = (loggedIn) ? 'auth' : 'guest';
 
@@ -185,20 +213,67 @@ const JoinDialog = ({
 
 	const handleSetName = () =>
 	{
-		const authData = JSON.parse(window.name);
+		try
+		{
+			const authData = JSON.parse(window.name);
 
-		changeDisplayName(authData.name);
+			changeDisplayName(authData.name);
+		}
+		catch (error)
+		{
+			logger.error('Invalid Authentication Data');
+		}
+
+	};
+
+	const streamCamVideo = (newMediaPerms) =>
+	{
+		const constraints = {
+			audio : (newMediaPerms.audio ? newMediaPerms.audio : false),
+			video : (newMediaPerms.video ? { width: 1280, height: 720 } : false)
+		};
+
+		if (newMediaPerms.audio || newMediaPerms.video)
+		{
+			navigator.mediaDevices
+				.getUserMedia(constraints)
+				.then(function(videoTrack)
+				{
+					videoElement.current.srcObject = videoTrack;
+				})
+				.catch(function(err)
+				{
+					logger.error(`${err.name} : ${err.message} ${JSON.stringify(mediaPerms.audio)}`);
+				});
+		}
+		else if (videoElement.current != null && videoElement.current.srcObject)
+		{
+			const tracks = videoElement.current.srcObject.getTracks();
+
+			for (let i = 0; i < tracks.length; i++)
+			{
+				tracks[i].stop();
+			}
+			videoElement.current.srcObject = null;
+		}
 	};
 
 	useEffect(() =>
 	{
 		window.history.replaceState({}, null, encodeURIComponent(roomId) || '/');
+		handleSetName();
+		// eslint-disable-next-line
 	}, [ roomId ]);
 
 	useEffect(() =>
 	{
+		streamCamVideo(mediaPerms);
+		// eslint-disable-next-line
+	}, [ mediaPerms ]);
+
+	useEffect(() =>
+	{
 		(location.pathname === '/') && history.push(encodeURIComponent(roomId));
-		handleSetName();
 	});
 
 	const _askForPerms = () =>
@@ -243,54 +318,10 @@ const JoinDialog = ({
 		});
 	};
 
-	// const handleFocus = (event) => event.target.select();
-
-	/*
-	const handleAuth = () =>
-	{
-		_askForPerms();
-
-		const encodedRoomId = encodeURIComponent(roomId);
-
-		!loggedIn ?
-			roomClient.login(encodedRoomId) :
-			roomClient.join({
-				roomId    : encodedRoomId,
-				joinVideo : mediaPerms.video,
-				joinAudio : mediaPerms.audio
-			});
-
-	};
-	*/
-
 	const handleJoinUsingEnterKey = (event) =>
 	{
 		if (event.key === 'Enter') document.getElementById('joinButton').click();
 	};
-
-	// const handleChangeDisplayName = (event) =>
-	// {
-	// 	const { key } = event;
-
-	// 	switch (key)
-	// 	{
-	// 		case 'Enter':
-	// 		case 'Escape':
-
-	// 		{
-	// 			displayName = displayName.trim();
-
-	// 			if (displayName === '')
-	// 				changeDisplayName(
-	// 					`Guest ${Math.floor(Math.random() * (100000 - 10000)) + 10000}`);
-	// 			if (room.inLobby)
-	// 				roomClient.changeDisplayName(displayName);
-	// 			break;
-	// 		}
-	// 		default:
-	// 			break;
-	// 	}
-	// };
 
 	return (
 		<div className={classes.root}>
@@ -301,93 +332,26 @@ const JoinDialog = ({
 					paper : classes.dialogPaper
 				}}
 			>
-
-				<DialogTitle disableTypography className={classes.dialogTitle}>
-					<Grid
-						container
-						direction='row'
-						justify='space-between'
-						alignItems='center'
-					>
-						<Grid item>
-							{ window.config.logo !=='' ?
-								<img alt='Logo' src={window.config.logo} /> :
-								<Typography variant='h5'> {window.config.title} </Typography>
-							}
-						</Grid>
-						{/* <Grid item>
-							{ window.config.loginEnabled &&
-							<Tooltip
-								open
-								title={intl.formatMessage({
-									id             : loggedIn ? 'label.logout' : 'label.login',
-									defaultMessage : loggedIn ? 'Logout' : 'Login'
-								})}
-								placement='left'
-							>
-								<IconButton
-									className={classes.accountButton}
-									onClick={
-										loggedIn ?
-											() => roomClient.logout(roomId) :
-											() => roomClient.login(roomId)
-									}
-								>
-									{ myPicture ?
-										<Avatar src={myPicture} className={classes.accountButtonAvatar} />
-										:
-										<AccountCircle
-											className={
-												classnames(
-													classes.accountButtonAvatar, loggedIn ? classes.green : null
-												)
-											}
-										/>
-									}
-								</IconButton>
-							</Tooltip>
-							}
-
-						</Grid> */}
-					</Grid>
-				</DialogTitle>
-
 				<DialogContent>
-					<hr />
-					{/* ROOM NAME */}
-					{/* <TextField
-						autoFocus
-						id='roomId'
-						label={intl.formatMessage({
-							id             : 'label.roomName',
-							defaultMessage : 'Room name'
-						})}
-						value={roomId}
-						variant='outlined'
-						margin='normal'
-						InputProps={{
-							startAdornment : (
-								<InputAdornment position='start'>
-									<MeetingRoomIcon />
-								</InputAdornment>
-							)
-						}}
-						onChange={(event) =>
-						{
-							const { value } = event.target;
-
-							setRoomId(value.toLowerCase());
-
-						}}
-						onFocus={handleFocus}
-						onBlur={() =>
-						{
-							if (roomId === '')
-								setRoomId(randomString({ length: 10 }));
-						}}
-						fullWidth
-					/> */}
-					{/* /ROOM NAME */}
+					{/* CHECK ROOM VIDEO */}
+					<div className={classes.videoContainer}>
+						<div className={classes.info}>
+							<span className={classes.displayName}>
+								{displayName}
+							</span>
+						</div>
+						<video
+							ref={videoElement}
+							className={classnames(classes.video, {
+								hidden : mediaPerms.video
+							})}
+							autoPlay
+							playsInline
+							muted
+							controls={false}
+						/>
+					</div>
+					{/* CHECK ROOM VIDEO */}
 
 					{/* AUTH TOGGLE BUTTONS */}
 					{false &&
@@ -428,47 +392,6 @@ const JoinDialog = ({
 					</Grid>
 					}
 					{/* /AUTH TOGGLE BUTTONS */}
-
-					{/* NAME FIELD get name from classroom */}
-					{/* <TextField
-						id='displayname'
-						label={intl.formatMessage({
-							id             : 'label.yourName',
-							defaultMessage : 'Your name'
-						})}
-						value={displayName}
-						variant='outlined'
-						onFocus={handleFocus}
-
-						InputProps={{
-							startAdornment : (
-								<InputAdornment position='start'>
-									<AccountCircle />
-								</InputAdornment>
-							)
-						}}
-
-						margin='normal'
-						disabled={displayNameInProgress}
-						onChange={(event) =>
-						{
-							const { value } = event.target;
-
-							changeDisplayName(value);
-						}}
-						onKeyDown={handleChangeDisplayName}
-						onBlur={() =>
-						{
-							displayName = displayName.trim();
-
-							if (displayName === '')
-								changeDisplayName(`Guest ${Math.floor(Math.random() * (100000 - 10000)) + 10000}`);
-							if (room.inLobby)
-								roomClient.changeDisplayName(displayName);
-						}}
-						fullWidth
-					/> */}
-					{/* NAME FIELD*/}
 
 					{!room.inLobby && room.overRoomLimit &&
 						<DialogContentText className={classes.red} variant='h6' gutterBottom>
@@ -575,40 +498,6 @@ const JoinDialog = ({
 								</Button>
 
 							</Grid>
-							{/*
-							{authType === 'auth' && !loggedIn &&
-							<Grid item>
-								<Button
-									onClick={handleAuth}
-									variant='contained'
-									color='secondary'
-									id='joinButton'
-								>
-									<FormattedMessage
-										id='room.login'
-										defaultMessage='Next'
-									/>
-								</Button>
-
-							</Grid>
-							}
-							{authType === 'auth' && loggedIn &&
-							<Grid item>
-								<Button
-									onClick={handleJoin}
-									variant='contained'
-									className={classes.joinButton}
-									id='joinButton'
-								>
-									<FormattedMessage
-										id='room.login'
-										defaultMessage='Join'
-									/>
-								</Button>
-
-							</Grid>
-							}
-							*/}
 
 							{/* /JOIN BUTTON */}
 

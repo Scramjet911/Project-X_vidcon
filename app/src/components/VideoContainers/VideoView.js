@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
-import EditableInput from '../Controls/EditableInput';
 import Logger from '../../Logger';
 import { yellow, orange, red } from '@material-ui/core/colors';
 import SignalCellularOffIcon from '@material-ui/icons/SignalCellularOff';
@@ -140,7 +139,7 @@ const styles = (theme) =>
 		{
 			fontSize        : 14,
 			fontWeight      : 400,
-			color           : 'rgba(255, 255, 255, 0.85)',
+			color           : 'rgba(0, 0, 255, 0.85)',
 			border          : 'none',
 			borderBottom    : '1px solid #aeff00',
 			backgroundColor : 'transparent'
@@ -148,7 +147,6 @@ const styles = (theme) =>
 		displayNameStatic :
 		{
 			userSelect : 'none',
-			cursor     : 'text',
 			fontSize   : 14,
 			fontWeight : 400,
 			color      : 'rgba(255, 255, 255, 0.85)',
@@ -201,7 +199,7 @@ class VideoView extends React.PureComponent
 			consumerPreferredTemporalLayer,
 			audioCodec,
 			videoCodec,
-			onChangeDisplayName,
+			// onChangeDisplayName,
 			children,
 			classes,
 			netInfo
@@ -359,30 +357,9 @@ class VideoView extends React.PureComponent
 					{ showPeerInfo &&
 						<div className={classes.peer}>
 							<div className={classes.box}>
-								{ isMe ?
-									<React.Fragment>
-										<EditableInput
-											value={displayName}
-											propName='newDisplayName'
-											className={classes.displayNameEdit}
-											classLoading='loading'
-											classInvalid='invalid'
-											shouldBlockWhileLoading
-											editProps={{
-												maxLength   : 30,
-												autoCorrect : 'off',
-												spellCheck  : false
-											}}
-											onChange={
-												({ newDisplayName }) =>
-													onChangeDisplayName(newDisplayName)}
-										/>
-									</React.Fragment>
-									:
-									<span className={classes.displayNameStatic}>
-										{displayName}
-									</span>
-								}
+								<span className={classes.displayNameStatic}>
+									{displayName}
+								</span>
 							</div>
 						</div>
 					}
