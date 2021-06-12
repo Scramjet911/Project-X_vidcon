@@ -235,9 +235,9 @@ const TopBar = (props) =>
 		canProduceExtraVideo,
 		canLock,
 		canPromote,
-		classes,
-		locale,
-		localesList
+		classes
+		// locale,
+		// localesList
 	} = props;
 
 	const isMenuOpen = Boolean(anchorEl);
@@ -516,7 +516,7 @@ const TopBar = (props) =>
 					</div>
 					<div className={classes.divider} />
 
-					<Button
+					{/* <Button
 						aria-label={locale.split(/[-_]/)[0]}
 						className={classes.actionButton}
 						color='secondary'
@@ -524,7 +524,7 @@ const TopBar = (props) =>
 						onClick={(event) => handleMenuOpen(event, 'localeMenu')}
 					>
 						{locale.split(/[-_]/)[0]}
-					</Button>
+					</Button> */}
 
 					<Button
 						aria-label={intl.formatMessage({
@@ -656,7 +656,7 @@ const TopBar = (props) =>
 					</Paper>
 				}
 
-				{ currentMenu === 'localeMenu' &&
+				{/* { currentMenu === 'localeMenu' &&
 					<Paper>
 						{localesList.map((item, index) => (
 							<MenuItem
@@ -672,7 +672,7 @@ const TopBar = (props) =>
 							</MenuItem>)
 						)}
 					</Paper>
-				}
+				} */}
 
 			</Popover>
 			<Menu
@@ -955,9 +955,9 @@ TopBar.propTypes =
 	canPromote           : PropTypes.bool.isRequired,
 	classes              : PropTypes.object.isRequired,
 	theme                : PropTypes.object.isRequired,
-	intl                 : PropTypes.object.isRequired,
-	locale               : PropTypes.object.isRequired,
-	localesList          : PropTypes.object.isRequired
+	intl                 : PropTypes.object.isRequired
+	// locale               : PropTypes.object.isRequired,
+	// localesList          : PropTypes.object.isRequired
 };
 
 const makeMapStateToProps = () =>
@@ -987,9 +987,9 @@ const makeMapStateToProps = () =>
 				state.toolarea.unreadFiles + raisedHandsSelector(state),
 			canProduceExtraVideo : hasExtraVideoPermission(state),
 			canLock              : hasLockPermission(state),
-			canPromote           : hasPromotionPermission(state),
-			locale               : state.intl.locale,
-			localesList          : state.intl.list
+			canPromote           : hasPromotionPermission(state)
+			// locale               : state.intl.locale,
+			// localesList          : state.intl.list
 		});
 
 	return mapStateToProps;
@@ -1056,9 +1056,9 @@ export default withRoomContext(connect(
 				prev.me.roles === next.me.roles &&
 				prev.toolarea.unreadMessages === next.toolarea.unreadMessages &&
 				prev.toolarea.unreadFiles === next.toolarea.unreadFiles &&
-				prev.toolarea.toolAreaOpen === next.toolarea.toolAreaOpen &&
-				prev.intl.locale === next.intl.locale &&
-				prev.intl.localesList === next.intl.localesList
+				prev.toolarea.toolAreaOpen === next.toolarea.toolAreaOpen
+				// prev.intl.locale === next.intl.locale &&
+				// prev.intl.localesList === next.intl.localesList
 			);
 		}
 	}

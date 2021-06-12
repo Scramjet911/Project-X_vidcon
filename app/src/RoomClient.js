@@ -518,7 +518,7 @@ export default class RoomClient
 			messages : store.getState().intl.messages
 		});
 
-		document.documentElement.lang = store.getState().intl.locale.toUpperCase();
+		// document.documentElement.lang = store.getState().intl.locale.toUpperCase();
 
 	}
 

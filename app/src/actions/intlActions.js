@@ -1,7 +1,7 @@
 import { UPDATE } from 'react-intl-redux';
 
-export const updateIntl = ({ locale, formats, messages, list }) =>
+export const updateIntl = ({ formats, messages, list }) =>
 	({
 		type    : UPDATE,
-		payload : { locale, formats, messages, list }
+		payload : { formats, messages, list }
 	});

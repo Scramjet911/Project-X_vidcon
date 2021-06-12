@@ -1,7 +1,7 @@
 import { UPDATE } from 'react-intl-redux';
 
 const initialState = {
-	locale   : null,
+	locale   : 'en',
 	messages : null
 };
 

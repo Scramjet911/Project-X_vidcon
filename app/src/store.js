@@ -79,7 +79,7 @@ const pReducer = persistReducer(persistConfig, rootReducer);
 
 const initialState = {
 	intl : {
-		locale   : null,
+		locale   : 'en',
 		messages : null
 	}
 	// ...other initialState

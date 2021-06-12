@@ -37,10 +37,10 @@ const styles = (theme) =>
 const AppearanceSettings = (props) =>
 {
 	const {
-		roomClient,
+		// roomClient,
 		isMobile,
 		room,
-		locale,
+		// locale,
 		settings,
 		onTogglePermanentTopBar,
 		onToggleHiddenControls,
@@ -50,8 +50,8 @@ const AppearanceSettings = (props) =>
 		onToggleMirrorOwnVideo,
 		handleChangeMode,
 		handleChangeAspectRatio,
-		classes,
-		localesList
+		classes
+		// localesList
 
 	} = props;
 
@@ -82,7 +82,7 @@ const AppearanceSettings = (props) =>
 	return (
 		<React.Fragment>
 
-			<FormControl className={classes.setting}>
+			{/* <FormControl className={classes.setting}>
 				<Select
 					value={locale || ''}
 					onChange={(event) =>
@@ -113,7 +113,7 @@ const AppearanceSettings = (props) =>
 						defaultMessage='Select language'
 					/>
 				</FormHelperText>
-			</FormControl>
+			</FormControl> */}
 
 			<FormControl className={classes.setting}>
 				<Select
@@ -255,18 +255,18 @@ AppearanceSettings.propTypes =
 	handleChangeMode          : PropTypes.func.isRequired,
 	handleChangeAspectRatio   : PropTypes.func.isRequired,
 	classes                   : PropTypes.object.isRequired,
-	intl                      : PropTypes.object.isRequired,
-	locale                    : PropTypes.object.isRequired,
-	localesList               : PropTypes.object.isRequired
+	intl                      : PropTypes.object.isRequired
+	// locale                    : PropTypes.object.isRequired,
+	// localesList               : PropTypes.object.isRequired
 };
 
 const mapStateToProps = (state) =>
 	({
-		isMobile   	: state.me.browser.platform === 'mobile',
-		room        : state.room,
-		settings    : state.settings,
-		locale      : state.intl.locale,
-		localesList : state.intl.list
+		isMobile : state.me.browser.platform === 'mobile',
+		room     : state.room,
+		settings : state.settings
+		// locale      : state.intl.locale,
+		// localesList : state.intl.list
 	});
 
 const mapDispatchToProps = {
@@ -290,9 +290,9 @@ export default withRoomContext(connect(
 			return (
 				prev.me.browser === next.me.browser &&
 				prev.room === next.room &&
-				prev.settings === next.settings &&
-				prev.intl.locale === next.intl.locale &&
-				prev.intl.localesList === next.intl.localesList
+				prev.settings === next.settings
+				// prev.intl.locale === next.intl.locale &&
+				// prev.intl.localesList === next.intl.localesList
 			);
 		}
 	}
