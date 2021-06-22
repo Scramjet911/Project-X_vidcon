@@ -57,7 +57,7 @@
 		"start": "HTTPS=true PORT=4443 react-scripts start",
 		"build": "react-scripts build && mkdir -p ../server/public && rm -rf ../server/public/* && cp -r build/* ../server/public/",
 		"test": "react-scripts test",
-		"dev": "nf start -p 3000",
+		"dev": "DEBUG=project-x nf start -p 4443",
 		"lint": "eslint -c .eslintrc.json --ext .js src"
 	},
 	"browserslist": [

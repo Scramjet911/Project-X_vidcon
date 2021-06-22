@@ -785,6 +785,74 @@ export default class RoomClient
 		}
 	}
 
+	async startRecording()
+	{
+		logger.debug('startRecording() Started Recording');
+
+		try
+		{
+			await this.sendRequest('startRecording');
+
+			store.dispatch(requestActions.notify(
+				{
+					type : 'message',
+					text : intl.formatMessage({
+						id 	           : 'room.recordStarted',
+						defaultMessage : 'Recording started'
+					})
+				}
+			));
+		}
+		catch (error)
+		{
+			logger.error('startRecording() [error:"%o"', error);
+
+			store.dispatch(requestActions.notify(
+				{
+					type : 'error',
+					text : intl.formatMessage({
+						id 	           : 'room.recordError',
+						defaultMessage : 'Unable to start recording'
+					})
+				}
+			));
+		}
+	}
+
+	async stopRecording()
+	{
+		logger.debug('Recording() Stopped Recording');
+
+		try
+		{
+			await this.sendRequest('stopRecording', this._peerId);
+
+			store.dispatch(requestActions.notify(
+				{
+					type : 'message',
+					text : intl.formatMessage({
+						id 	           : 'room.recordStopped',
+						defaultMessage : 'Recording stopped'
+					})
+				}
+			));
+		}
+		catch (error)
+		{
+			logger.error('stopRecording() [error:"%o"', error);
+
+			store.dispatch(requestActions.notify(
+				{
+					type : 'error',
+					text : intl.formatMessage({
+						id 	           : 'room.recordError',
+						defaultMessage : 'Unable to stop recording'
+					})
+				}
+			));
+		}
+	}
+
 	saveFile(file)
 	{
 		file.getBlob((err, blob) =>

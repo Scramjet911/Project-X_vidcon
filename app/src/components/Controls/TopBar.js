@@ -42,6 +42,8 @@ import Tooltip from '@material-ui/core/Tooltip';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
+import RecordIcon from '@material-ui/icons/FiberManualRecord';
+import StopRecordIcon from '@material-ui/icons/Stop';
 
 const styles = (theme) =>
 	({
@@ -179,6 +181,7 @@ const TopBar = (props) =>
 	const [ mobileMoreAnchorEl, setMobileMoreAnchorEl ] = useState(null);
 	const [ anchorEl, setAnchorEl ] = useState(null);
 	const [ currentMenu, setCurrentMenu ] = useState(null);
+	const [ isRecording, setRecording ] = useState(false);
 
 	const handleExited = () =>
 	{
@@ -239,6 +242,15 @@ const TopBar = (props) =>
 		// locale,
 		// localesList
 	} = props;
+
+	const handleRecording = async () =>
+	{
+		if (isRecording)
+			roomClient.stopRecording();
+		else
+			roomClient.startRecording();
+		setRecording(!isRecording);
+	};
 
 	const isMenuOpen = Boolean(anchorEl);
 	const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -554,6 +566,46 @@ const TopBar = (props) =>
 			>
 				{ currentMenu === 'moreActions' &&
 					<Paper>
+						<MenuItem
+							disabled={false}
+							onClick={() =>
+							{
+								handleMenuClose();
+								handleRecording();
+							}}
+						>
+							{ isRecording ?
+								<>
+									<StopRecordIcon
+										aria-label={intl.formatMessage({
+											id             : 'label.',
+											defaultMessage : 'Stop recording'
+										})}
+									/>
+									<p className={classes.moreAction}>
+										<FormattedMessage
+											id='label.stopRecording'
+											defaultMessage='Stop Recording'
+										/>
+									</p>
+								</>
+								:
+								<>
+									<RecordIcon
+										aria-label={intl.formatMessage({
+											id             : 'label.',
+											defaultMessage : 'Start recording'
+										})}
+									/>
+									<p className={classes.moreAction}>
+										<FormattedMessage
+											id='label.startRecording'
+											defaultMessage='Start Recording'
+										/>
+									</p>
+								</>
+							}
+						</MenuItem>
 						<MenuItem
 							disabled={!canProduceExtraVideo}
 							onClick={() =>
