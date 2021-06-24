@@ -105,7 +105,7 @@
 		],
 		"max-len": [
 			2,
-			90,
+			120,
 			{
 				"tabWidth": 2,
 				"comments": 110,

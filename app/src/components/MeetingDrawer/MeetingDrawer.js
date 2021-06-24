@@ -4,6 +4,10 @@ import { raisedHandsSelector } from '../Selectors';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import * as toolareaActions from '../../actions/toolareaActions';
+import ShowChartRoundedIcon from '@material-ui/icons/ShowChartRounded';
+import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
+import ChatIcon from '@material-ui/icons/Chat';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useIntl } from 'react-intl';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
@@ -11,16 +15,22 @@ import Tab from '@material-ui/core/Tab';
 import Badge from '@material-ui/core/Badge';
 import Chat from './Chat/Chat';
 import FileSharing from './FileSharing/FileSharing';
+import AttentionStats from './AttentionStats/AttentionStats';
 import ParticipantList from './ParticipantList/ParticipantList';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+import Logger from '../../Logger';
+
+const logger = new Logger('Meeting Drawer');
 
 const tabs =
 [
 	'chat',
 	'files',
-	'users'
+	'users',
+	'attention'
 ];
 
 const styles = (theme) =>
@@ -41,6 +51,12 @@ const styles = (theme) =>
 		tabsHeader :
 		{
 			flexGrow : 1
+		},
+		tab :
+		{
+			width    : '25% !important',
+			minWidth : '25% !important'
+			// maxWidth : '48% !important'
 		}
 	});
 
@@ -59,6 +75,37 @@ const MeetingDrawer = (props) =>
 		theme
 	} = props;
 
+	const [ attention, setAttention ] = React.useState(0);
+
+	const handleFetchAttention = async () =>
+	{
+		logger.debug('Fetching Attention');
+		const authdata = JSON.parse(window.name);
+		const attentionPromise = await fetch(`https://localhost:8883/api/v1/conference/attention/${authdata.classId}`,
+			{
+				method  : 'GET',
+				headers : {
+					'Authorization' : `Bearer ${authdata.token}`,
+					'Accept'        : 'application/json'
+				}
+			});
+
+		attentionPromise.json()
+			.then((data) =>
+			{
+				logger.debug(data);
+
+				if (data !== attention)
+				{
+					setAttention(data.attention);
+				}
+			})
+			.catch((err) =>
+			{
+				logger.debug(`Error : ${err}`);
+			});
+	};
+
 	return (
 		<div className={classes.root}>
 			<AppBar
@@ -72,37 +119,120 @@ const MeetingDrawer = (props) =>
 					onChange={(event, value) => setToolTab(tabs[value])}
 					indicatorColor='primary'
 					textColor='primary'
-					variant='fullWidth'
+					variant='standard'
 				>
 					<Tab
 						label={
 							<Badge color='secondary' badgeContent={unreadMessages}>
-								{intl.formatMessage({
+								<Tooltip
+									title={intl.formatMessage({
+										id             : 'label.chat',
+										defaultMessage : 'Chat'
+									})}
+								>
+									<IconButton
+										aria-label={intl.formatMessage({
+											id             : 'tooltip.chat',
+											defaultMessage : 'Show chat'
+										})}
+										className={classes.actionButton}
+										color='inherit'
+									>
+										<ChatIcon />
+									</IconButton>
+								</Tooltip>
+								{/* {intl.formatMessage({
 									id             : 'label.chat',
 									defaultMessage : 'Chat'
-								})}
+								})} */}
 							</Badge>
 						}
+						className={classes.tab}
 					/>
 					<Tab
 						label={
 							<Badge color='secondary' badgeContent={unreadFiles}>
-								{intl.formatMessage({
+								<Tooltip
+									title={intl.formatMessage({
+										id             : 'label.filesharing',
+										defaultMessage : 'File sharing'
+									})}
+								>
+									<IconButton
+										aria-label={intl.formatMessage({
+											id             : 'tooltip.filesharing',
+											defaultMessage : 'Share Files'
+										})}
+										className={classes.actionButton}
+										color='inherit'
+									>
+										<FileCopyIcon />
+									</IconButton>
+								</Tooltip>
+								{/* {intl.formatMessage({
 									id             : 'label.filesharing',
 									defaultMessage : 'File sharing'
-								})}
+								})} */}
 							</Badge>
 						}
+						className={classes.tab}
 					/>
 					<Tab
 						label={
 							<Badge color='secondary' badgeContent={raisedHands}>
-								{intl.formatMessage({
+								<Tooltip
+									title={intl.formatMessage({
+										id             : 'label.participants',
+										defaultMessage : 'Participants'
+									})}
+								>
+									<IconButton
+										aria-label={intl.formatMessage({
+											id             : 'tooltip.participants',
+											defaultMessage : 'Show participants'
+										})}
+										className={classes.actionButton}
+										color='inherit'
+									>
+										<PeopleAltRoundedIcon />
+									</IconButton>
+								</Tooltip>
+								{/* {intl.formatMessage({
 									id             : 'label.participants',
 									defaultMessage : 'Participants'
-								})}
+								})} */}
 							</Badge>
 						}
+						className={classes.tab}
+					/>
+					<Tab
+						label={
+							<Badge color='secondary' variant='dot'>
+								<Tooltip
+									title={intl.formatMessage({
+										id             : 'label.attention',
+										defaultMessage : 'Attention Statistics'
+									})}
+								>
+									<IconButton
+										aria-label={intl.formatMessage({
+											id             : 'tooltip.openAttention',
+											defaultMessage : 'Open attention statistics'
+										})}
+										className={classes.actionButton}
+										color='inherit'
+									>
+										<ShowChartRoundedIcon />
+									</IconButton>
+								</Tooltip>
+								{/* {intl.formatMessage({
+									id             : 'label.attention',
+									defaultMessage : 'Attention'
+								})} */}
+							</Badge>
+						}
+						className={classes.tab}
+						onClick={() => handleFetchAttention()}
 					/>
 				</Tabs>
 				<IconButton onClick={closeDrawer}>
@@ -112,6 +242,7 @@ const MeetingDrawer = (props) =>
 			{currentToolTab === 'chat' && <Chat />}
 			{currentToolTab === 'files' && <FileSharing />}
 			{currentToolTab === 'users' && <ParticipantList />}
+			{currentToolTab === 'attention' && <AttentionStats attentionState={attention} />}
 		</div>
 	);
 };

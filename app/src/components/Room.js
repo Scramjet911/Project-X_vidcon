@@ -52,7 +52,7 @@ const styles = (theme) =>
 			flexShrink                     : 0,
 			[theme.breakpoints.down('lg')] :
 			{
-				width : '40vw'
+				width : '32vw'
 			},
 			[theme.breakpoints.down('md')] :
 			{
@@ -72,7 +72,7 @@ const styles = (theme) =>
 			width                          : '30vw',
 			[theme.breakpoints.down('lg')] :
 			{
-				width : '40vw'
+				width : '32vw'
 			},
 			[theme.breakpoints.down('md')] :
 			{

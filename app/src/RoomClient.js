@@ -1,7 +1,7 @@
 import Logger from './Logger';
 import hark from 'hark';
 import { getSignalingUrl } from './urlFactory';
-import { SocketTimeoutError } from './utils';
+import { SocketTimeoutError, injectScript } from './utils';
 import * as requestActions from './actions/requestActions';
 import * as meActions from './actions/meActions';
 import * as intlActions from './actions/intlActions';
@@ -20,6 +20,7 @@ import Spotlights from './Spotlights';
 import { permissions } from './permissions';
 import * as locales from './translations/locales';
 import { createIntl } from 'react-intl';
+import AttentionDetection from './components/AttentionDetect/AttentionDetect';
 
 let createTorrent;
 
@@ -253,12 +254,27 @@ export default class RoomClient
 
 		this._screenSharingProducer = null;
 
+		this._detectorProcess = null;
+
+		this._isOpencvLoaded = false;
+
 		this._startKeyListener();
 
 		this._startDevicesListener();
 
 		this.setLocale(store.getState().intl.locale);
 
+		injectScript('opencv-injected-js',
+			'https://cdn.jsdelivr.net/npm/@mjyc/opencv.js@1.0.0/opencv.min.js')
+			.then(() =>
+			{
+				this._isOpencvLoaded = true;
+			})
+			.catch(() =>
+			{
+				// eslint-disable-next-line no-console
+				logger.debug('Failed to load opencv');
+			});
 	}
 
 	close()
@@ -1583,6 +1599,13 @@ export default class RoomClient
 							source : 'webcam'
 						}
 					});
+				}
+
+				if (stream && this._detectorProcess === null && this._isOpencvLoaded)
+				{
+					logger.debug(`Attention detect!!!!!! stream : ${stream} detector : ${this._detectorProcess}`);
+
+					this._detectorProcess = new AttentionDetection(stream);
 				}
 
 				store.dispatch(producerActions.addProducer(
@@ -4037,6 +4060,12 @@ export default class RoomClient
 	async disableWebcam()
 	{
 		logger.debug('disableWebcam()');
+
+		if (this._detectorProcess)
+		{
+			this._detectorProcess.stopDetection();
+			this._detectorProcess = null;
+		}
 
 		if (!this._webcamProducer)
 			return;

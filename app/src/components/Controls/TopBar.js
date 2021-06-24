@@ -49,12 +49,12 @@ const styles = (theme) =>
 	({
 		persistentDrawerOpen :
 		{
-			width                          : 'calc(100% - 30vw)',
-			marginLeft                     : '30vw',
+			width                          : 'calc(100% - 20vw)',
+			marginLeft                     : '20vw',
 			[theme.breakpoints.down('lg')] :
 			{
-				width      : 'calc(100% - 40vw)',
-				marginLeft : '40vw'
+				width      : 'calc(100% - 32vw)',
+				marginLeft : '32vw'
 			},
 			[theme.breakpoints.down('md')] :
 			{
